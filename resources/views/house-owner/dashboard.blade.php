@@ -38,11 +38,11 @@
             <div class="stats-card">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="stats-number">{{ $stats['total_tenants'] }}</div>
-                        <div class="stats-label">Active Tenants</div>
+                        <div class="stats-number">{{ $stats['total_bills'] }}</div>
+                        <div class="stats-label">Total Bills</div>
                     </div>
                     <div class="text-warning">
-                        <i class="bi bi-people" style="font-size: 2rem;"></i>
+                        <i class="bi bi-receipt" style="font-size: 2rem;"></i>
                     </div>
                 </div>
             </div>
@@ -142,9 +142,9 @@
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <a href="{{ url('/house-owner/tenants') }}" class="btn btn-outline-warning w-100">
-                                <i class="bi bi-people d-block mb-2" style="font-size: 1.5rem;"></i>
-                                Manage Tenants
+                            <a href="{{ url('/house-owner/bill-categories') }}" class="btn btn-outline-warning w-100">
+                                <i class="bi bi-tags d-block mb-2" style="font-size: 1.5rem;"></i>
+                                Bill Categories
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">

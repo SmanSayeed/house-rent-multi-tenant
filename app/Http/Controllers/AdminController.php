@@ -75,6 +75,15 @@ class AdminController extends Controller
     }
 
     /**
+     * Get flats for a building (API endpoint)
+     */
+    public function getBuildingFlats(Building $building)
+    {
+        $flats = $building->flats()->select('id', 'flat_number', 'rent_amount')->get();
+        return response()->json($flats);
+    }
+
+    /**
      * Show system settings
      */
     public function settings()

@@ -8,6 +8,7 @@ use App\Models\Flat;
 use App\Models\Bill;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class AdminService
 {
@@ -106,5 +107,52 @@ class AdminService
     public function deleteUser(User $user): bool
     {
         return $user->delete();
+    }
+
+    /**
+     * Get all tenants with optional filters
+     */
+    public function getAllTenants(array $filters = [], int $perPage = 20): LengthAwarePaginator
+    {
+        $query = User::tenants()->with(['tenantAssignments.flat.building']);
+
+        // Filter by search term
+        if (isset($filters['search']) && $filters['search']) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('contact', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by status (active/inactive based on assignments)
+        if (isset($filters['status']) && $filters['status']) {
+            if ($filters['status'] === 'active') {
+                $query->whereHas('tenantAssignments', function ($q) {
+                    $q->where('status', 'active');
+                });
+            } elseif ($filters['status'] === 'inactive') {
+                $query->whereDoesntHave('tenantAssignments', function ($q) {
+                    $q->where('status', 'active');
+                });
+            }
+        }
+
+        // Filter by building
+        if (isset($filters['building_id']) && $filters['building_id']) {
+            $query->whereHas('tenantAssignments.flat', function ($q) use ($filters) {
+                $q->where('building_id', $filters['building_id']);
+            });
+        }
+
+        // Filter by flat
+        if (isset($filters['flat_id']) && $filters['flat_id']) {
+            $query->whereHas('tenantAssignments', function ($q) use ($filters) {
+                $q->where('flat_id', $filters['flat_id']);
+            });
+        }
+
+        return $query->latest()->paginate($perPage);
     }
 }

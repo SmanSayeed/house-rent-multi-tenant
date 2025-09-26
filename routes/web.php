@@ -28,6 +28,22 @@ Route::prefix('admin')->group(function () {
         Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('admin.users.show');
         Route::get('/buildings', [AdminController::class, 'buildings'])->name('admin.buildings');
         Route::get('/buildings/{building}', [AdminController::class, 'showBuilding'])->name('admin.buildings.show');
+        Route::get('/buildings/{building}/flats', [AdminController::class, 'getBuildingFlats'])->name('admin.buildings.flats');
+        
+        // Admin Tenant Management Routes
+        Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class)
+            ->names([
+                'index' => 'admin.tenants.index',
+                'create' => 'admin.tenants.create',
+                'store' => 'admin.tenants.store',
+                'show' => 'admin.tenants.show',
+                'edit' => 'admin.tenants.edit',
+                'update' => 'admin.tenants.update',
+                'destroy' => 'admin.tenants.destroy',
+            ]);
+        Route::patch('/tenants/{tenant}/assign', [\App\Http\Controllers\Admin\TenantController::class, 'assignToFlat'])->name('admin.tenants.assign');
+        Route::patch('/tenants/{tenant}/remove', [\App\Http\Controllers\Admin\TenantController::class, 'removeFromFlat'])->name('admin.tenants.remove');
+        
         Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
 
         // Admin Profile Routes
@@ -73,18 +89,6 @@ Route::prefix('house-owner')->group(function () {
                 'destroy' => 'house-owner.flats.destroy',
             ]);
 
-        // Tenant Management Routes
-        Route::resource('tenants', \App\Http\Controllers\HouseOwner\TenantController::class)
-            ->names([
-                'index' => 'house-owner.tenants.index',
-                'create' => 'house-owner.tenants.create',
-                'store' => 'house-owner.tenants.store',
-                'show' => 'house-owner.tenants.show',
-                'edit' => 'house-owner.tenants.edit',
-                'update' => 'house-owner.tenants.update',
-                'destroy' => 'house-owner.tenants.destroy',
-            ]);
-        Route::patch('/tenants/{tenant}/terminate', [\App\Http\Controllers\HouseOwner\TenantController::class, 'terminate'])->name('house-owner.tenants.terminate');
 
         // Bill Management Routes
         Route::resource('bills', \App\Http\Controllers\HouseOwner\BillController::class)

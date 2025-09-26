@@ -174,19 +174,20 @@ class HouseOwnerService
     /**
      * Get payments for the house owner
      */
-    public function getPayments(array $filters = [])
+    public function getPayments(array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
-        $query = Payment::whereHas('bill.flat.building', function($query) {
-            $query->where('owner_id', Auth::id());
-        })
-        ->with(['bill.flat.building']);
+        $houseOwnerId = Auth::id();
+        $query = Payment::with(['bill.flat.building', 'tenant'])
+            ->whereHas('bill.flat.building', function($query) use ($houseOwnerId) {
+                $query->where('owner_id', $houseOwnerId);
+            });
 
         // Filter by status
-        if (isset($filters['status']) && in_array($filters['status'], ['paid', 'pending'])) {
+        if (isset($filters['status']) && in_array($filters['status'], ['completed', 'pending', 'failed'])) {
             $query->where('status', $filters['status']);
         }
 
-        return $query->latest()->paginate(20);
+        return $query->latest()->paginate($perPage);
     }
 
     /**

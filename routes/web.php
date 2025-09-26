@@ -116,6 +116,28 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Tenant Routes
+Route::prefix('tenant')->group(function () {
+    // Tenant Authentication
+    Route::get('/login', [\App\Http\Controllers\TenantAuthController::class, 'showLogin'])->name('tenant.login');
+    Route::post('/login', [\App\Http\Controllers\TenantAuthController::class, 'login']);
+    Route::post('/logout', [\App\Http\Controllers\TenantAuthController::class, 'logout'])->name('tenant.logout');
+
+    // Tenant Protected Routes
+    Route::middleware(['auth', 'tenant'])->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\TenantController::class, 'dashboard'])->name('tenant.dashboard');
+        Route::get('/bills', [\App\Http\Controllers\TenantController::class, 'bills'])->name('tenant.bills');
+        Route::get('/bills/{bill}', [\App\Http\Controllers\TenantController::class, 'showBill'])->name('tenant.bills.show');
+        Route::get('/payments', [\App\Http\Controllers\TenantController::class, 'payments'])->name('tenant.payments');
+        Route::get('/profile', [\App\Http\Controllers\TenantController::class, 'profile'])->name('tenant.profile');
+        Route::put('/profile', [\App\Http\Controllers\TenantController::class, 'updateProfile'])->name('tenant.profile.update');
+        Route::get('/settings', [\App\Http\Controllers\TenantController::class, 'settings'])->name('tenant.settings');
+        Route::get('/notifications', [\App\Http\Controllers\TenantController::class, 'notifications'])->name('tenant.notifications');
+        Route::get('/support', [\App\Http\Controllers\TenantController::class, 'support'])->name('tenant.support');
+        Route::post('/support', [\App\Http\Controllers\TenantController::class, 'submitSupport'])->name('tenant.support.submit');
+    });
+});
+
 // Test route for admin dashboard
 Route::get('/test-admin', function () {
     $adminService = new \App\Services\AdminService();

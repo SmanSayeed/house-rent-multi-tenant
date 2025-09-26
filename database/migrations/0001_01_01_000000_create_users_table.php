@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['admin', 'house_owner', 'tenant'])->default('tenant');
+            $table->string('contact')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

@@ -154,12 +154,6 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->is('house-owner/tenants*') ? 'active' : '' }}"
-                        href="{{ url('/house-owner/tenants') }}">
-                        <i class="bi bi-people"></i> Tenants
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link {{ request()->is('house-owner/bills*') ? 'active' : '' }}"
                         href="{{ url('/house-owner/bills') }}">
                         <i class="bi bi-receipt"></i> Bills

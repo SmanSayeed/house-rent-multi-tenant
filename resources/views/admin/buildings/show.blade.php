@@ -72,46 +72,37 @@
         </div>
 
         <div class="col-lg-4">
-            <!-- Bill Categories Section -->
+            <!-- Building Statistics -->
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-receipt me-2"></i>Bill Categories
-                    </h5>
-                </div>
-                <div class="card-body">
-                    @if ($building->billCategories->count() > 0)
-                        @foreach ($building->billCategories as $category)
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>{{ $category->name }}</span>
-                            </div>
-                        @endforeach
-                    @else
-                        <p class="text-muted">No bill categories found</p>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Statistics -->
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-graph-up me-2"></i>Statistics
+                        <i class="bi bi-graph-up me-2"></i>Building Statistics
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row text-center">
-                        <div class="col-6">
+                        <div class="col-6 mb-3">
                             <h4 class="text-primary">{{ $building->flats->count() }}</h4>
                             <small class="text-muted">Total Flats</small>
                         </div>
-                        <div class="col-6">
-                            <h4 class="text-success">{{ $building->billCategories->count() }}</h4>
-                            <small class="text-muted">Bill Categories</small>
+                        <div class="col-6 mb-3">
+                            <h4 class="text-success">{{ $building->flats->where('status', 'occupied')->count() }}</h4>
+                            <small class="text-muted">Occupied</small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h4 class="text-warning">{{ $building->flats->where('status', 'available')->count() }}</h4>
+                            <small class="text-muted">Available</small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h4 class="text-info">
+                                {{ $building->flats->sum('rent_amount') ? 'Tk ' . number_format($building->flats->sum('rent_amount'), 2) : 'N/A' }}
+                            </h4>
+                            <small class="text-muted">Total Rent</small>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 

@@ -47,10 +47,16 @@
                                             </td>
                                             <td>{{ $building->created_at->format('M d, Y') }}</td>
                                             <td>
-                                                <a href="{{ url('/admin/buildings/' . $building->id) }}"
-                                                    class="btn btn-sm btn-outline-primary">
-                                                    <i class="bi bi-eye"></i> View
-                                                </a>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ url('/admin/buildings/' . $building->id) }}"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </a>
+                                                    <a href="{{ url('/admin/buildings/' . $building->id . '/flats') }}"
+                                                        class="btn btn-sm btn-outline-info">
+                                                        <i class="bi bi-house-door"></i> Flats
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

@@ -154,6 +154,18 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/bills*') ? 'active' : '' }}"
+                        href="{{ url('/admin/bills') }}">
+                        <i class="bi bi-receipt"></i> Bills
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/payments*') ? 'active' : '' }}"
+                        href="{{ url('/admin/payments') }}">
+                        <i class="bi bi-credit-card"></i> Payments
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ request()->is('admin/settings*') ? 'active' : '' }}"
                         href="{{ url('/admin/settings') }}">
                         <i class="bi bi-gear"></i> Settings

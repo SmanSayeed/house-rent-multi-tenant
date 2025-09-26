@@ -155,4 +155,42 @@ class AdminService
 
         return $query->latest()->paginate($perPage);
     }
+
+    /**
+     * Get all bills across all tenants
+     */
+    public function getAllBills()
+    {
+        return Bill::with(['flat.building.owner', 'category', 'payments'])
+            ->latest()
+            ->paginate(15);
+    }
+
+    /**
+     * Get specific bill by ID
+     */
+    public function getBillById($billId)
+    {
+        return Bill::with(['flat.building.owner', 'category', 'payments'])
+            ->find($billId);
+    }
+
+    /**
+     * Get all payments across all tenants
+     */
+    public function getAllPayments()
+    {
+        return Payment::with(['bill.flat.building.owner', 'bill.category'])
+            ->latest()
+            ->paginate(15);
+    }
+
+    /**
+     * Get specific payment by ID
+     */
+    public function getPaymentById($paymentId)
+    {
+        return Payment::with(['bill.flat.building.owner', 'bill.category'])
+            ->find($paymentId);
+    }
 }

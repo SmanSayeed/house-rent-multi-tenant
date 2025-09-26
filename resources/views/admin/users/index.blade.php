@@ -12,6 +12,9 @@
                         <i class="bi bi-people me-2"></i>All Users
                     </h5>
                     <div class="d-flex gap-2">
+                        <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Create User
+                        </a>
                         <form method="GET" class="d-flex">
                             <select name="role" class="form-select me-2" onchange="this.form.submit()">
                                 <option value="">All Roles</option>
@@ -68,10 +71,28 @@
                                             <td>{{ $user->contact ?? 'N/A' }}</td>
                                             <td>{{ $user->created_at->format('M d, Y') }}</td>
                                             <td>
-                                                <a href="{{ url('/admin/users/' . $user->id) }}"
-                                                    class="btn btn-sm btn-outline-primary">
-                                                    <i class="bi bi-eye"></i> View
-                                                </a>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ route('admin.users.show', $user) }}"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="{{ route('admin.users.edit', $user) }}"
+                                                        class="btn btn-sm btn-outline-warning">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    @if ($user->id !== auth()->id())
+                                                        <form method="POST"
+                                                            action="{{ route('admin.users.destroy', $user) }}"
+                                                            class="d-inline"
+                                                            onsubmit="return confirm('Are you sure you want to delete this user?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

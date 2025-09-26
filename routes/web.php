@@ -25,10 +25,21 @@ Route::prefix('admin')->group(function () {
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+        Route::get('/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
+        Route::post('/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
         Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('admin.users.show');
+        Route::get('/users/{user}/edit', [AdminController::class, 'editUser'])->name('admin.users.edit');
+        Route::put('/users/{user}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+        Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('admin.users.destroy');
         Route::get('/buildings', [AdminController::class, 'buildings'])->name('admin.buildings');
         Route::get('/buildings/{building}', [AdminController::class, 'showBuilding'])->name('admin.buildings.show');
         Route::get('/buildings/{building}/flats', [AdminController::class, 'getBuildingFlats'])->name('admin.buildings.flats');
+
+        // Admin Bills and Payments Routes
+        Route::get('/bills', [AdminController::class, 'bills'])->name('admin.bills');
+        Route::get('/bills/{bill}', [AdminController::class, 'showBill'])->name('admin.bills.show');
+        Route::get('/payments', [AdminController::class, 'payments'])->name('admin.payments');
+        Route::get('/payments/{payment}', [AdminController::class, 'showPayment'])->name('admin.payments.show');
 
         // Admin Tenant Management Routes
         Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class)
@@ -43,6 +54,7 @@ Route::prefix('admin')->group(function () {
             ]);
         Route::patch('/tenants/{tenant}/assign', [\App\Http\Controllers\Admin\TenantController::class, 'assignToFlat'])->name('admin.tenants.assign');
         Route::patch('/tenants/{tenant}/remove', [\App\Http\Controllers\Admin\TenantController::class, 'removeFromFlat'])->name('admin.tenants.remove');
+        Route::post('/tenants/assign', [AdminController::class, 'assignTenantToFlat'])->name('admin.tenants.assign');
 
         Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
 

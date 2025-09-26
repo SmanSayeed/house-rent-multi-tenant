@@ -11,6 +11,8 @@ class BillCategory extends Model
         'name',
         'description',
         'is_active',
+        'icon',
+        'color',
     ];
 
     public function bills(): HasMany

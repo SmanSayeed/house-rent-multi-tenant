@@ -29,7 +29,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/buildings', [AdminController::class, 'buildings'])->name('admin.buildings');
         Route::get('/buildings/{building}', [AdminController::class, 'showBuilding'])->name('admin.buildings.show');
         Route::get('/buildings/{building}/flats', [AdminController::class, 'getBuildingFlats'])->name('admin.buildings.flats');
-        
+
         // Admin Tenant Management Routes
         Route::resource('tenants', \App\Http\Controllers\Admin\TenantController::class)
             ->names([
@@ -43,7 +43,7 @@ Route::prefix('admin')->group(function () {
             ]);
         Route::patch('/tenants/{tenant}/assign', [\App\Http\Controllers\Admin\TenantController::class, 'assignToFlat'])->name('admin.tenants.assign');
         Route::patch('/tenants/{tenant}/remove', [\App\Http\Controllers\Admin\TenantController::class, 'removeFromFlat'])->name('admin.tenants.remove');
-        
+
         Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
 
         // Admin Profile Routes
@@ -89,6 +89,19 @@ Route::prefix('house-owner')->group(function () {
                 'destroy' => 'house-owner.flats.destroy',
             ]);
 
+
+        // Bill Categories Management Routes
+        Route::resource('bill-categories', \App\Http\Controllers\HouseOwner\BillCategoryController::class)
+            ->names([
+                'index' => 'house-owner.bill-categories.index',
+                'create' => 'house-owner.bill-categories.create',
+                'store' => 'house-owner.bill-categories.store',
+                'show' => 'house-owner.bill-categories.show',
+                'edit' => 'house-owner.bill-categories.edit',
+                'update' => 'house-owner.bill-categories.update',
+                'destroy' => 'house-owner.bill-categories.destroy',
+            ]);
+        Route::patch('/bill-categories/{billCategory}/toggle-status', [\App\Http\Controllers\HouseOwner\BillCategoryController::class, 'toggleStatus'])->name('house-owner.bill-categories.toggle-status');
 
         // Bill Management Routes
         Route::resource('bills', \App\Http\Controllers\HouseOwner\BillController::class)

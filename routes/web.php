@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HouseOwnerAuthController;
@@ -61,18 +62,16 @@ Route::prefix('house-owner')->group(function () {
     });
 });
 
+// House Owner Public Authentication Routes
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 // Test route for admin dashboard
 Route::get('/test-admin', function () {
     $adminService = new \App\Services\AdminService();
     $stats = $adminService->getDashboardStats();
     return response()->json($stats);
 });
-
-// Legacy Authentication Routes (placeholder)
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');

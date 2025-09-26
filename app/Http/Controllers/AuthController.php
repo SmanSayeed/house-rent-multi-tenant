@@ -7,11 +7,53 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
+use App\Http\Requests\HouseOwnerRegistrationRequest;
 
 class AuthController extends Controller
 {
     /**
-     * Login user and create token
+     * Show house owner registration form
+     */
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
+    /**
+     * Register a new house owner
+     */
+    public function register(HouseOwnerRegistrationRequest $request)
+    {
+        $validated = $request->validated();
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'house_owner',
+            'contact' => $validated['contact'],
+        ]);
+
+        Auth::login($user);
+
+        return redirect('/house-owner/dashboard')
+            ->with('success', 'Registration successful! Welcome to the platform.');
+    }
+
+    /**
+     * Show house owner login form
+     */
+    public function showLogin()
+    {
+        if (Auth::check() && Auth::user()->isHouseOwner()) {
+            return redirect('/house-owner/dashboard');
+        }
+
+        return view('auth.login');
+    }
+
+    /**
+     * Login house owner
      */
     public function login(Request $request)
     {
@@ -22,56 +64,34 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+        if (!$user || !$user->isHouseOwner()) {
+            return back()->withErrors([
+                'email' => 'Invalid house owner credentials.',
+            ])->withInput(['email' => $request->email]);
         }
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors([
+                'email' => 'Invalid house owner credentials.',
+            ])->withInput(['email' => $request->email]);
+        }
 
-        return response()->json([
-            'message' => 'Login successful',
-            'user' => $user,
-            'token' => $token,
-        ]);
+        Auth::login($user, $request->has('remember'));
+
+        return redirect()->intended('/house-owner/dashboard')
+            ->with('success', 'Welcome back, ' . $user->name . '!');
     }
 
     /**
-     * Register a new user
-     */
-    public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $token = $user->createToken('auth-token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Registration successful',
-            'user' => $user,
-            'token' => $token,
-        ], 201);
-    }
-
-    /**
-     * Logout user and revoke token
+     * Logout house owner
      */
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return response()->json([
-            'message' => 'Logout successful',
-        ]);
+        return redirect('/')
+            ->with('success', 'You have been logged out successfully.');
     }
 }

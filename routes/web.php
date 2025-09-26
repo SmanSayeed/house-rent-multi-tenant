@@ -116,6 +116,8 @@ Route::prefix('house-owner')->group(function () {
             ]);
         Route::get('/bills/{bill}/invoice', [\App\Http\Controllers\HouseOwner\BillController::class, 'invoice'])->name('house-owner.bills.invoice');
         Route::patch('/bills/{bill}/mark-as-paid', [\App\Http\Controllers\HouseOwner\BillController::class, 'markAsPaid'])->name('house-owner.bills.mark-as-paid');
+        Route::get('/bills/dues', [\App\Http\Controllers\HouseOwner\BillController::class, 'dues'])->name('house-owner.bills.dues');
+        Route::post('/bills/carry-forward-dues', [\App\Http\Controllers\HouseOwner\BillController::class, 'carryForwardDues'])->name('house-owner.bills.carry-forward-dues');
         Route::get('/payments', [HouseOwnerController::class, 'payments'])->name('house-owner.payments');
 
         // House Owner Profile Routes

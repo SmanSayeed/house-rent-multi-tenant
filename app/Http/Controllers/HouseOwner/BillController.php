@@ -328,4 +328,101 @@ class BillController extends Controller
             return redirect()->back()->with('error', 'Failed to mark bill as paid. Please try again.');
         }
     }
+
+    /**
+     * Show dues management page.
+     */
+    public function dues(Request $request)
+    {
+        try {
+            $filters = $request->only(['flat_id', 'category_id', 'search']);
+            $dues = $this->houseOwnerService->getDues($filters);
+            $flats = $this->houseOwnerService->getFlats();
+            $categories = $this->houseOwnerService->getBillCategories();
+
+            Log::info('House owner viewed dues management', [
+                'user_id' => Auth::id(),
+                'dues_count' => $dues->count(),
+                'filters' => $filters
+            ]);
+
+            return view('house-owner.bills.dues', compact('dues', 'flats', 'categories', 'filters'));
+        } catch (\Exception $e) {
+            Log::error('Error loading dues for house owner', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+            return redirect()->back()->with('error', 'Failed to load dues. Please try again.');
+        }
+    }
+
+    /**
+     * Carry forward dues to a new bill.
+     */
+    public function carryForwardDues(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'flat_id' => 'required|exists:flats,id',
+                'category_id' => 'required|exists:bill_categories,id',
+                'due_bill_ids' => 'required|array|min:1',
+                'due_bill_ids.*' => 'exists:bills,id',
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string|max:1000',
+                'due_date' => 'required|date|after:today',
+            ]);
+
+            // Verify all bills belong to the house owner
+            $houseOwnerId = Auth::id();
+            $bills = Bill::whereIn('id', $validated['due_bill_ids'])
+                ->whereHas('flat.building', function($query) use ($houseOwnerId) {
+                    $query->where('owner_id', $houseOwnerId);
+                })
+                ->where('status', '!=', 'paid')
+                ->get();
+
+            if ($bills->count() !== count($validated['due_bill_ids'])) {
+                return redirect()->back()->with('error', 'Some selected bills are invalid or already paid.');
+            }
+
+            // Calculate total due amount
+            $totalDueAmount = $bills->sum('amount');
+
+            // Create new bill with carried forward amount
+            $newBill = Bill::create([
+                'flat_id' => $validated['flat_id'],
+                'category_id' => $validated['category_id'],
+                'title' => $validated['title'],
+                'description' => $validated['description'] . "\n\nCarried forward from: " . $bills->pluck('title')->join(', '),
+                'amount' => $totalDueAmount,
+                'due_date' => $validated['due_date'],
+                'status' => 'pending',
+            ]);
+
+            // Mark old bills as carried forward
+            $bills->each(function($bill) use ($newBill) {
+                $bill->update([
+                    'status' => 'carried_forward',
+                    'carried_forward_to' => $newBill->id,
+                ]);
+            });
+
+            Log::info('House owner carried forward dues', [
+                'user_id' => Auth::id(),
+                'new_bill_id' => $newBill->id,
+                'carried_bill_ids' => $bills->pluck('id')->toArray(),
+                'total_amount' => $totalDueAmount
+            ]);
+
+            return redirect()->route('house-owner.bills.show', $newBill)
+                ->with('success', 'Dues carried forward successfully! New bill created with total amount of Tk ' . number_format($totalDueAmount, 2));
+        } catch (\Exception $e) {
+            Log::error('Error carrying forward dues for house owner', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'data' => $request->all()
+            ]);
+            return redirect()->back()->with('error', 'Failed to carry forward dues. Please try again.');
+        }
+    }
 }

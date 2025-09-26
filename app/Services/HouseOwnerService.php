@@ -237,4 +237,38 @@ class HouseOwnerService
     {
         return TenantAssignment::create($data);
     }
+
+    /**
+     * Get dues (unpaid bills) for the authenticated house owner with optional filters.
+     */
+    public function getDues(array $filters = [], int $perPage = 20): LengthAwarePaginator
+    {
+        $houseOwnerId = Auth::id();
+        $query = Bill::with(['flat.building', 'category', 'payments'])
+            ->whereHas('flat.building', function($query) use ($houseOwnerId) {
+                $query->where('owner_id', $houseOwnerId);
+            })
+            ->whereIn('status', ['pending', 'overdue']);
+
+        // Filter by flat
+        if (isset($filters['flat_id']) && $filters['flat_id']) {
+            $query->where('flat_id', $filters['flat_id']);
+        }
+
+        // Filter by category
+        if (isset($filters['category_id']) && $filters['category_id']) {
+            $query->where('category_id', $filters['category_id']);
+        }
+
+        // Filter by search term
+        if (isset($filters['search']) && $filters['search']) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->latest()->paginate($perPage);
+    }
 }

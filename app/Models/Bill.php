@@ -16,6 +16,7 @@ class Bill extends Model
         'amount',
         'due_date',
         'status',
+        'carried_forward_to',
     ];
 
     protected $casts = [

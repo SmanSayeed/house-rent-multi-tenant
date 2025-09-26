@@ -7,9 +7,14 @@
         <h4 class="mb-0">
             <i class="bi bi-receipt me-2"></i>My Bills
         </h4>
-        <a href="{{ route('house-owner.bills.create') }}" class="btn btn-success">
-            <i class="bi bi-plus-circle me-2"></i>Create New Bill
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('house-owner.bills.dues') }}" class="btn btn-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>Manage Dues
+            </a>
+            <a href="{{ route('house-owner.bills.create') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle me-2"></i>Create New Bill
+            </a>
+        </div>
     </div>
 
     @if (session('success'))

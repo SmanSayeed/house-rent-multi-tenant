@@ -10,6 +10,7 @@ use App\Models\Bill;
 use App\Models\Payment;
 use App\Models\TenantAssignment;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class HouseOwnerService
 {
@@ -49,30 +50,81 @@ class HouseOwnerService
     public function getBuildings()
     {
         return Building::where('owner_id', Auth::id())
-            ->with(['flats', 'billCategories'])
+            ->with(['flats'])
             ->latest()
             ->paginate(20);
     }
 
     /**
+     * Get flats for the house owner with optional filters
+     */
+    public function getFlats(array $filters = [], int $perPage = 20): LengthAwarePaginator
+    {
+        $houseOwnerId = Auth::id();
+        $query = Flat::with(['building', 'tenantAssignments.tenant'])
+            ->whereHas('building', function ($query) use ($houseOwnerId) {
+                $query->where('owner_id', $houseOwnerId);
+            });
+
+        if (isset($filters['building_id']) && $filters['building_id']) {
+            $query->where('building_id', $filters['building_id']);
+        }
+
+        if (isset($filters['status']) && $filters['status']) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (isset($filters['search']) && $filters['search']) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('flat_number', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->latest()->paginate($perPage);
+    }
+
+    /**
      * Get flats for a specific building
      */
-    public function getFlats(Building $building)
+    public function getFlatsForBuilding(Building $building)
     {
         return $building->flats()->with(['tenantAssignments.tenant'])->paginate(20);
     }
 
     /**
-     * Get tenants for the house owner
+     * Get tenants for the house owner with optional filters
      */
-    public function getTenants()
+    public function getTenants(array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
-        return TenantAssignment::whereHas('building', function($query) {
-            $query->where('owner_id', Auth::id());
-        })
-        ->with(['tenant', 'building', 'flat'])
-        ->latest()
-        ->paginate(20);
+        $houseOwnerId = Auth::id();
+        $query = TenantAssignment::with(['tenant', 'building', 'flat'])
+            ->whereHas('building', function($query) use ($houseOwnerId) {
+                $query->where('owner_id', $houseOwnerId);
+            });
+
+        if (isset($filters['building_id']) && $filters['building_id']) {
+            $query->where('building_id', $filters['building_id']);
+        }
+
+        if (isset($filters['flat_id']) && $filters['flat_id']) {
+            $query->where('flat_id', $filters['flat_id']);
+        }
+
+        if (isset($filters['status']) && $filters['status']) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (isset($filters['search']) && $filters['search']) {
+            $search = $filters['search'];
+            $query->whereHas('tenant', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->latest()->paginate($perPage);
     }
 
     /**
@@ -80,37 +132,43 @@ class HouseOwnerService
      */
     public function getBillCategories()
     {
-        return BillCategory::whereHas('building', function($query) {
-            $query->where('owner_id', Auth::id());
-        })
-        ->with(['building'])
-        ->latest()
-        ->paginate(20);
+        return BillCategory::where('is_active', true)
+            ->latest()
+            ->paginate(20);
     }
 
     /**
-     * Get bills for the house owner
+     * Get bills for the house owner with optional filters
      */
-    public function getBills(array $filters = [])
+    public function getBills(array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
-        $query = Bill::whereHas('flat.building', function($query) {
-            $query->where('owner_id', Auth::id());
-        })
-        ->with(['flat.building', 'category']);
+        $houseOwnerId = Auth::id();
+        $query = Bill::with(['flat.building', 'category', 'payments'])
+            ->whereHas('flat.building', function($query) use ($houseOwnerId) {
+                $query->where('owner_id', $houseOwnerId);
+            });
 
-        // Filter by status
-        if (isset($filters['status']) && in_array($filters['status'], ['paid', 'unpaid'])) {
+        if (isset($filters['flat_id']) && $filters['flat_id']) {
+            $query->where('flat_id', $filters['flat_id']);
+        }
+
+        if (isset($filters['category_id']) && $filters['category_id']) {
+            $query->where('category_id', $filters['category_id']);
+        }
+
+        if (isset($filters['status']) && $filters['status']) {
             $query->where('status', $filters['status']);
         }
 
-        // Filter by building
-        if (isset($filters['building_id'])) {
-            $query->whereHas('flat', function($q) use ($filters) {
-                $q->where('building_id', $filters['building_id']);
+        if (isset($filters['search']) && $filters['search']) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
-        return $query->latest()->paginate(20);
+        return $query->latest()->paginate($perPage);
     }
 
     /**

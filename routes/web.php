@@ -48,10 +48,57 @@ Route::prefix('house-owner')->group(function () {
     // House Owner Protected Routes
     Route::middleware(['auth', 'house-owner'])->group(function () {
         Route::get('/dashboard', [HouseOwnerController::class, 'dashboard'])->name('house-owner.dashboard');
-        Route::get('/buildings', [HouseOwnerController::class, 'buildings'])->name('house-owner.buildings');
-        Route::get('/flats', [HouseOwnerController::class, 'flats'])->name('house-owner.flats');
-        Route::get('/tenants', [HouseOwnerController::class, 'tenants'])->name('house-owner.tenants');
-        Route::get('/bills', [HouseOwnerController::class, 'bills'])->name('house-owner.bills');
+
+        // Building Management Routes
+        Route::resource('buildings', \App\Http\Controllers\HouseOwner\BuildingController::class)
+            ->names([
+                'index' => 'house-owner.buildings.index',
+                'create' => 'house-owner.buildings.create',
+                'store' => 'house-owner.buildings.store',
+                'show' => 'house-owner.buildings.show',
+                'edit' => 'house-owner.buildings.edit',
+                'update' => 'house-owner.buildings.update',
+                'destroy' => 'house-owner.buildings.destroy',
+            ]);
+
+        // Flat Management Routes
+        Route::resource('flats', \App\Http\Controllers\HouseOwner\FlatController::class)
+            ->names([
+                'index' => 'house-owner.flats.index',
+                'create' => 'house-owner.flats.create',
+                'store' => 'house-owner.flats.store',
+                'show' => 'house-owner.flats.show',
+                'edit' => 'house-owner.flats.edit',
+                'update' => 'house-owner.flats.update',
+                'destroy' => 'house-owner.flats.destroy',
+            ]);
+
+        // Tenant Management Routes
+        Route::resource('tenants', \App\Http\Controllers\HouseOwner\TenantController::class)
+            ->names([
+                'index' => 'house-owner.tenants.index',
+                'create' => 'house-owner.tenants.create',
+                'store' => 'house-owner.tenants.store',
+                'show' => 'house-owner.tenants.show',
+                'edit' => 'house-owner.tenants.edit',
+                'update' => 'house-owner.tenants.update',
+                'destroy' => 'house-owner.tenants.destroy',
+            ]);
+        Route::patch('/tenants/{tenant}/terminate', [\App\Http\Controllers\HouseOwner\TenantController::class, 'terminate'])->name('house-owner.tenants.terminate');
+
+        // Bill Management Routes
+        Route::resource('bills', \App\Http\Controllers\HouseOwner\BillController::class)
+            ->names([
+                'index' => 'house-owner.bills.index',
+                'create' => 'house-owner.bills.create',
+                'store' => 'house-owner.bills.store',
+                'show' => 'house-owner.bills.show',
+                'edit' => 'house-owner.bills.edit',
+                'update' => 'house-owner.bills.update',
+                'destroy' => 'house-owner.bills.destroy',
+            ]);
+        Route::get('/bills/{bill}/invoice', [\App\Http\Controllers\HouseOwner\BillController::class, 'invoice'])->name('house-owner.bills.invoice');
+        Route::patch('/bills/{bill}/mark-as-paid', [\App\Http\Controllers\HouseOwner\BillController::class, 'markAsPaid'])->name('house-owner.bills.mark-as-paid');
         Route::get('/payments', [HouseOwnerController::class, 'payments'])->name('house-owner.payments');
 
         // House Owner Profile Routes

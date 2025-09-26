@@ -61,7 +61,7 @@ class HouseOwnerService
     public function getFlats(array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
         $houseOwnerId = Auth::id();
-        $query = Flat::with(['building', 'tenantAssignments.tenant'])
+        $query = Flat::with(['building', 'tenantAssignments.tenant', 'bills.category'])
             ->whereHas('building', function ($query) use ($houseOwnerId) {
                 $query->where('owner_id', $houseOwnerId);
             });

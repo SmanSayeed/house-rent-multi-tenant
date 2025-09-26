@@ -43,8 +43,9 @@ class HouseOwnerController extends Controller
     public function flats()
     {
         $flats = $this->houseOwnerService->getFlats();
+        $buildings = $this->houseOwnerService->getBuildings();
 
-        return view('house-owner.flats.index', compact('flats'));
+        return view('house-owner.flats.index', compact('flats', 'buildings'));
     }
 
     /**

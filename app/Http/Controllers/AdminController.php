@@ -69,7 +69,7 @@ class AdminController extends Controller
      */
     public function showBuilding(Building $building)
     {
-        $building->load(['owner', 'flats', 'billCategories']);
+        $building->load(['owner', 'flats.tenantAssignments.tenant']);
 
         return view('admin.buildings.show', compact('building'));
     }

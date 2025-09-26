@@ -55,7 +55,7 @@ class TenantController extends Controller
      */
     public function create(Request $request)
     {
-        $flatId = $request->get('flat');
+        $flatId = $request->get('flat');    
         $buildings = $this->houseOwnerService->getBuildings();
         $flats = $this->houseOwnerService->getFlats();
 
